@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Hello, world!</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="styles.css" />
+    <!-- <link rel="icon" href="favicon.png"> -->
+</head>
+<body>
+        <h1>Pokedata 2</h1>
+
+        <p>
+            <button id="randomizeBtn">Randomize Pokémon</button>
+            <button id="savePokemonBtn" style="display:none;">Save Pokemon to Database</button>
+            <button id="viewRegistryBtn" style="display:none;">View All Pokémon (Registry)</button>
+            <button id="exportRegistryBtn" style="display:none;">Export Registry to JSON</button>
+            <button id="clearRegistryBtn" style="display:none;">Clear Registry</button>
+            <label>Battle Mode: 
+                <select id="battleModeSelect">
+                    <option value="1v1-single">1v1</option>
+                    <option value="1v1-teams">1v1 (3v3 Teams with Switching)</option>
+                    <option value="1v1-full">1v1 (6v6 Teams with Switching)</option>
+                    <option value="2v2">2v2</option>
+                    <option value="full">Full Teams (4v4 with Switching)</option>
+                </select>
+            </label>
+        </p>
+
+        <p>
+            <input id="tournamentSizeInput" type="text" value="1024" style="width:80px" placeholder="Battlers/Teams" />
+            <button id="runTournamentBtn">Run Tournament</button>
+            <label><input id="over600BSTCheckbox" type="checkbox" /> Include 600+ BST</label>
+            <label><input id="randomAbilitiesCheckbox" type="checkbox" checked /> Random Abilities</label>
+            <label><input id="allowWonderGuardCheckbox" type="checkbox" /> Allow Wonder Guard</label>
+            <label><input id="randomItemsCheckbox" type="checkbox" checked /> Random Items</label>
+            <label><input id="experimentalColorsCheckbox" type="checkbox" /> Experimental Colors</label>
+            <label><input id="normalTournamentCheckbox" type="checkbox" /> No Random</label>
+        </p>
+
+        <p>
+            <label>Pokemon Gen: 
+                <label><input id="pokemonGen1Checkbox" type="checkbox" checked /> 1</label>
+                <label><input id="pokemonGen2Checkbox" type="checkbox" checked /> 2</label>
+                <label><input id="pokemonGen3Checkbox" type="checkbox" checked /> 3</label>
+                <label><input id="pokemonGen4Checkbox" type="checkbox" checked /> 4</label>
+                <label><input id="pokemonGen5Checkbox" type="checkbox" checked /> 5</label>
+            </label>
+            <label>Moves Gen: 
+                <label><input id="movesGen1Checkbox" type="checkbox" checked /> 1</label>
+                <label><input id="movesGen2Checkbox" type="checkbox" checked /> 2</label>
+                <label><input id="movesGen3Checkbox" type="checkbox" checked /> 3</label>
+                <label><input id="movesGen4Checkbox" type="checkbox" checked /> 4</label>
+                <label><input id="movesGen5Checkbox" type="checkbox" checked /> 5</label>
+            </label>
+        </p>
+        <div style="display:flex; align-items:flex-start; gap:1rem; margin-top:1rem;">
+            <div id="logs" class="pokemon-info"></div>
+            <div id="spriteArea" style="display:none;">
+                <canvas id="canvas" width="96" height="96" class="pokemon-sprite"></canvas>
+            </div>
+        </div>
+
+        <script type="module" src="./src/index.js?v=2"></script>
+        
+        <script>
+            // Handle power of 2 increments for tournament size
+            const sizeInput = document.getElementById('tournamentSizeInput');
+            
+            sizeInput.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    let value = parseInt(sizeInput.value) || 1024;
+                    sizeInput.value = value * 2;
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    let value = parseInt(sizeInput.value) || 1024;
+                    if (value > 2) {
+                        sizeInput.value = value / 2;
+                    }
+                }
+            });
+            
+            sizeInput.addEventListener('blur', () => {
+                let value = parseInt(sizeInput.value);
+                if (isNaN(value) || value < 2) {
+                    sizeInput.value = 2;
+                    return;
+                }
+                
+                // Find closest power of 2
+                const powerOfTwo = Math.round(Math.log2(value));
+                const newValue = Math.pow(2, powerOfTwo);
+                sizeInput.value = newValue;
+            });
+        </script>
+</body>
+</html>
