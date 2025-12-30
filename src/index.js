@@ -1285,7 +1285,13 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 		} else {
 			// 1v1 teams: check filters for team size (3 or 6)
 			const battleMode = document.getElementById('battleModeSelect')?.value || '1v1-teams';
-			teamSize = battleMode === '1v1-full' ? 6 : 3;
+			if (battleMode === '1v1-full') {
+				teamSize = 6;
+			} else if (battleMode === 'full') {
+				teamSize = 4;
+			} else {
+				teamSize = 3;
+			}
 		}
 		for (let i = 0; i < size; i++) {
 			const team = [];
