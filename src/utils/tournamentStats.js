@@ -220,16 +220,28 @@ export class TournamentStats {
       stats: Array.from(this.pokemonStats.values())
     };
 
+    return this._decorateSummary(summary);
+  }
+
+  // Convenience accessor for all pokemon stats
+  getAll() {
+    return Array.from(this.pokemonStats.values());
+  }
+
+  // Internal helper to sort summaries (kept separate so getSummary stays minimal)
+  _decorateSummary(summary) {
+    const stats = summary.stats;
+
     // Sort by various metrics
-    summary.byKills = [...summary.stats].sort((a, b) => b.kills - a.kills).slice(0, 10);
-    summary.byDamage = [...summary.stats].sort((a, b) => b.damageDealt - a.damageDealt).slice(0, 10);
-    summary.bySwitches = [...summary.stats].sort((a, b) => b.switches - a.switches).slice(0, 10);
-    summary.byWinRate = [...summary.stats]
+    summary.byKills = [...stats].sort((a, b) => b.kills - a.kills).slice(0, 10);
+    summary.byDamage = [...stats].sort((a, b) => b.damageDealt - a.damageDealt).slice(0, 10);
+    summary.bySwitches = [...stats].sort((a, b) => b.switches - a.switches).slice(0, 10);
+    summary.byWinRate = [...stats]
       .filter(s => s.battles > 0)
       .map(s => ({ ...s, winRate: s.wins / s.battles }))
       .sort((a, b) => b.winRate - a.winRate)
       .slice(0, 10);
-    summary.bySurvivability = [...summary.stats]
+    summary.bySurvivability = [...stats]
       .filter(s => s.battles > 0)
       .map(s => ({ ...s, survivalRate: (s.battles - s.deaths) / s.battles }))
       .sort((a, b) => b.survivalRate - a.survivalRate)
