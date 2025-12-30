@@ -484,6 +484,13 @@ export function battle1v1Teams(team1, team2) {
     bench: []
   };
   
+  // Tag team membership for sleep clause and logging
+  team1.forEach(p => p.teamId = 'team1');
+  team2.forEach(p => p.teamId = 'team2');
+  
+  // Sleep Clause: only allow one asleep per team (in 1v1 tournaments)
+  const sleepClause = { max: 1, counts: { team1: 0, team2: 0 } };
+  
   // Select starting Pokemon (first one in team)
   team1State.active = team1[0];
   team1State.bench = team1.slice(1);
@@ -509,61 +516,75 @@ export function battle1v1Teams(team1, team2) {
     // Don't switch too often - only in specific situations
     const hpPercent = active.currentHP / active.maxHp;
     
-    // Consider switching if very low HP and have healthy bench
-    if (hpPercent < 0.2 && Math.random() < 0.3) {
-      const healthyBench = availableBench.filter(p => p.currentHP / p.maxHp > 0.7);
+    // Helper: evaluate matchup score for a candidate vs opponent
+    function matchupScore(poke, foe) {
+      let score = 0;
+      if (foe) {
+        for (const oppType of foe.types) {
+          for (const myType of poke.types) {
+            const eff = typeChart[oppType]?.[myType] || 1;
+            if (eff < 1) score += 20; // Resist
+            else if (eff > 1) score -= 20; // Weak
+          }
+        }
+        for (const myType of poke.types) {
+          for (const oppType of foe.types) {
+            const eff = typeChart[myType]?.[oppType] || 1;
+            if (eff > 1) score += 18; // Super effective
+            else if (eff < 1) score -= 8; // Not very effective
+          }
+        }
+      }
+      score += (poke.currentHP / poke.maxHp) * 8; // prefer healthier
+      return score;
+    }
+    
+    const currentScore = matchupScore(active, opponent);
+    
+    // Consider switching if low HP and a much healthier bench option exists
+    if (hpPercent < 0.35 && Math.random() < 0.5) {
+      const healthyBench = availableBench.filter(p => p.currentHP / p.maxHp > 0.65);
       if (healthyBench.length > 0) {
-        return {
-          pokemon: healthyBench[Math.floor(Math.random() * healthyBench.length)],
-          reason: 'lowHP'
-        };
+        // pick the healthiest strong matchup
+        const best = healthyBench.reduce((bestP, p) => {
+          const s = matchupScore(p, opponent);
+          if (!bestP || s > bestP.score) return { poke: p, score: s };
+          return bestP;
+        }, null);
+        if (best && best.score > currentScore + 10) {
+          return {
+            pokemon: best.poke,
+            reason: 'lowHP'
+          };
+        }
       }
     }
     
-    // Consider switching if at type disadvantage (10% chance)
-    if (opponent && Math.random() < 0.1) {
+    // Consider switching if at type disadvantage
+    if (opponent && Math.random() < 0.25) {
       let hasDisadvantage = false;
       for (const oppType of opponent.types) {
         for (const myType of active.types) {
           const effectiveness = typeChart[oppType]?.[myType] || 1;
-          if (effectiveness > 1) {
-            hasDisadvantage = true;
-            break;
-          }
+          if (effectiveness > 1) { hasDisadvantage = true; break; }
         }
         if (hasDisadvantage) break;
       }
       
       if (hasDisadvantage) {
-        // Find Pokemon with better type matchup
         let bestSwitch = null;
         let bestScore = -1000;
         
         for (const bench of availableBench) {
-          let score = 0;
-          // Score based on defensive typing
-          for (const oppType of opponent.types) {
-            for (const benchType of bench.types) {
-              const effectiveness = typeChart[oppType]?.[benchType] || 1;
-              if (effectiveness < 1) score += 20; // Resist
-              else if (effectiveness > 1) score -= 20; // Weak
-            }
-          }
-          // Score based on offensive typing
-          for (const benchType of bench.types) {
-            for (const oppType of opponent.types) {
-              const effectiveness = typeChart[benchType]?.[oppType] || 1;
-              if (effectiveness > 1) score += 15; // Super effective
-              else if (effectiveness < 1) score -= 10; // Not very effective
-            }
-          }
+          const score = matchupScore(bench, opponent);
           if (score > bestScore) {
             bestScore = score;
             bestSwitch = bench;
           }
         }
         
-        if (bestScore > 10) {
+        // Switch if the bench option is meaningfully better than current
+        if (bestSwitch && bestScore > currentScore + 5 && bestScore > 10) {
           return {
             pokemon: bestSwitch,
             reason: 'typeDisadvantage'
@@ -687,8 +708,8 @@ export function battle1v1Teams(team1, team2) {
     p2.hitThisTurn = false;
     
     // Status damage
-    processStatus(p1);
-    processStatus(p2);
+    processStatus(p1, { sleepClause });
+    processStatus(p2, { sleepClause });
     
     // Check if anyone fainted from status
     if (p1.currentHP <= 0 || p2.currentHP <= 0) {
@@ -699,15 +720,15 @@ export function battle1v1Teams(team1, team2) {
       continue;
     }
     
-    // Switching phase (10% chance each turn before moves)
-    if (Math.random() < 0.1) {
+    // Switching phase (20% chance each turn before moves)
+    if (Math.random() < 0.2) {
       const switchResult = shouldSwitch(team1State, team2State.active);
       if (switchResult) {
         performSwitch(team1State, switchResult.pokemon, team2State.active, switchResult.reason);
       }
     }
     
-    if (Math.random() < 0.1) {
+    if (Math.random() < 0.2) {
       const switchResult = shouldSwitch(team2State, team1State.active);
       if (switchResult) {
         performSwitch(team2State, switchResult.pokemon, team1State.active, switchResult.reason);
@@ -754,17 +775,17 @@ export function battle1v1Teams(team1, team2) {
     // Execute moves
     if (p1Faster) {
       if (team1State.active.currentHP > 0) {
-        performMove(team1State.active, team2State.active, p1Move, { field, turnNumber: turn });
+        performMove(team1State.active, team2State.active, p1Move, { field, turnNumber: turn, sleepClause });
       }
       if (team2State.active.currentHP > 0) {
-        performMove(team2State.active, team1State.active, p2Move, { field, turnNumber: turn });
+        performMove(team2State.active, team1State.active, p2Move, { field, turnNumber: turn, sleepClause });
       }
     } else {
       if (team2State.active.currentHP > 0) {
-        performMove(team2State.active, team1State.active, p2Move, { field, turnNumber: turn });
+        performMove(team2State.active, team1State.active, p2Move, { field, turnNumber: turn, sleepClause });
       }
       if (team1State.active.currentHP > 0) {
-        performMove(team1State.active, team2State.active, p1Move, { field, turnNumber: turn });
+        performMove(team1State.active, team2State.active, p1Move, { field, turnNumber: turn, sleepClause });
       }
     }
     

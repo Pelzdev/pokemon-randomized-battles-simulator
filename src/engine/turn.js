@@ -1130,11 +1130,23 @@ export function applyEffect(effect, user, target, options = {}) {
           tournamentStats.recordStatusInflicted(user.name, target.name, 'confusion');
           logBattle(`${target.name} became confused!`);
         } else if (!target.status) {
+          // Sleep Clause: prevent putting more than allowed opponents to sleep (only applies when options.sleepClause is present)
+          if (effect.status === "sleep" && options.sleepClause?.counts && target.teamId) {
+            const teamCount = options.sleepClause.counts[target.teamId] || 0;
+            if (teamCount >= (options.sleepClause.max ?? 1)) {
+              logBattle(`${target.name} avoided sleep due to the Sleep Clause!`);
+              break;
+            }
+          }
+          
           target.status = effect.status;
           tournamentStats.recordStatusInflicted(user.name, target.name, effect.status);
           // set durations / counters for multi-turn statuses
           if (effect.status === "sleep") {
             target.statusTurns = effect.turns ?? (randomInt(1, 3));
+            if (options.sleepClause?.counts && target.teamId) {
+              options.sleepClause.counts[target.teamId] = (options.sleepClause.counts[target.teamId] || 0) + 1;
+            }
           } else if (effect.status === "toxic") {
             target.toxicCounter = 1;
           }
@@ -1381,9 +1393,10 @@ export function applyEffect(effect, user, target, options = {}) {
   }
 }
 
-export function processStatus(pokemon) {
+export function processStatus(pokemon, options = {}) {
   if (!pokemon.status) return;
   if (checkAbilityMagicGuard(pokemon)) return; // Magic Guard prevents status damage
+  const sleepClause = options.sleepClause;
   
   // Handle sleep status duration
   if (pokemon.status === "sleep") {
@@ -1393,6 +1406,9 @@ export function processStatus(pokemon) {
       pokemon.status = null;
       pokemon.statusTurns = 0;
       logBattle(`${pokemon.name} woke up!`);
+      if (sleepClause?.counts && pokemon.teamId && sleepClause.counts[pokemon.teamId] > 0) {
+        sleepClause.counts[pokemon.teamId]--;
+      }
     }
     return;
   }
