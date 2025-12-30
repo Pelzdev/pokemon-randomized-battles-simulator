@@ -1458,8 +1458,12 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 			numChampions = battleMode === '1v1-full' ? 6 : 3;
 		}
 		
+		console.log(`🏆 Displaying ${numChampions} champions. Champion is array: ${Array.isArray(champion)}, length: ${Array.isArray(champion) ? champion.length : 'N/A'}`);
+		
 		// Display each champion Pokemon
 		for (let i = 0; i < numChampions && i < (Array.isArray(champion) ? champion.length : 1); i++) {
+			console.log(`🏆 Processing champion ${i + 1}/${numChampions}`);
+			
 			// Create canvas for this champion
 			const canvas = document.createElement('canvas');
 			canvas.id = 'canvas';
@@ -1470,10 +1474,13 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 			// Create a temporary logs div so describePokemon doesn't clear our container
 			const tempLogs = document.createElement('div');
 			tempLogs.id = 'logs';
-			if (i === 0) {
-				realLogsDiv.replaceWith(tempLogs);
+			
+			// Replace the current logs div with temp logs
+			const currentLogs = document.getElementById('logs');
+			if (currentLogs) {
+				currentLogs.replaceWith(tempLogs);
 			} else {
-				document.getElementById('logs').replaceWith(tempLogs);
+				document.body.appendChild(tempLogs);
 			}
 			
 			// Display this champion
@@ -1504,7 +1511,12 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 			
 			// Restore the real logs div after last champion
 			if (i === numChampions - 1) {
-				tempLogs.replaceWith(realLogsDiv);
+				const currentLogs = document.getElementById('logs');
+				if (currentLogs) {
+					currentLogs.replaceWith(realLogsDiv);
+				} else {
+					document.body.appendChild(realLogsDiv);
+				}
 			}
 		}
 		
