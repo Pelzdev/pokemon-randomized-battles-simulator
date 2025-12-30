@@ -1285,6 +1285,7 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 		} else {
 			// 1v1 teams: check filters for team size (3 or 6)
 			const battleMode = document.getElementById('battleModeSelect')?.value || '1v1-teams';
+			console.log(`🔍 Team Creation Debug: battleMode="${battleMode}", is2v2=${is2v2}, fullTeams=${fullTeams}`);
 			if (battleMode === '1v1-full') {
 				teamSize = 6;
 			} else if (battleMode === 'full') {
@@ -1293,6 +1294,7 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 				teamSize = 3;
 			}
 		}
+		console.log(`👥 Creating teams with ${teamSize} Pokemon each`);
 		for (let i = 0; i < size; i++) {
 			const team = [];
 			for (let j = 0; j < teamSize; j++) {
