@@ -1248,6 +1248,9 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 		tournamentStats.reset();
 	}
 	
+	// Start timing Pokemon creation
+	const startCreation = performance.now();
+	
 	// Log registry stats before tournament
 	console.log(`📊 Pokemon Registry before tournament: ${pokemonRegistry.count()} Pokémon`);
 	
@@ -1310,6 +1313,9 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 	if (size <= 64) {
 		console.log('Tournament move mix:', { ...tournamentMoveStats });
 	}
+	
+	const endCreation = performance.now();
+	console.log(`⏱️ Pokemon creation took ${(endCreation - startCreation).toFixed(2)}ms for ${tournamentMoveStats.totalPokemon} Pokemon`);
 	const damagingPct = ((tournamentMoveStats.damaging / tournamentMoveStats.totalMoves) * 100).toFixed(1);
 	const statusPct = ((tournamentMoveStats.status / tournamentMoveStats.totalMoves) * 100).toFixed(1);
 	const boostPct = ((tournamentMoveStats.statBoost / tournamentMoveStats.totalMoves) * 100).toFixed(1);
