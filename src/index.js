@@ -1449,8 +1449,16 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 		// Store reference to the real logs div
 		const realLogsDiv = logsDiv;
 		
+		// Determine the number of champions to display (same logic as team creation)
+		let numChampions;
+		if (is2v2) {
+			numChampions = fullTeams ? 4 : 2;
+		} else {
+			const battleMode = document.getElementById('battleModeSelect')?.value || '1v1-teams';
+			numChampions = battleMode === '1v1-full' ? 6 : 3;
+		}
+		
 		// Display each champion Pokemon
-		const numChampions = fullTeams ? (Array.isArray(champion) ? champion.length : 3) : (Array.isArray(champion) ? champion.length : 2);
 		for (let i = 0; i < numChampions && i < (Array.isArray(champion) ? champion.length : 1); i++) {
 			// Create canvas for this champion
 			const canvas = document.createElement('canvas');
