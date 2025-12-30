@@ -1455,7 +1455,13 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 			numChampions = fullTeams ? 4 : 2;
 		} else {
 			const battleMode = document.getElementById('battleModeSelect')?.value || '1v1-teams';
-			numChampions = battleMode === '1v1-full' ? 6 : 3;
+			if (battleMode === '1v1-full') {
+				numChampions = 6;
+			} else if (battleMode === 'full') {
+				numChampions = 4;
+			} else {
+				numChampions = 3;
+			}
 		}
 		
 		console.log(`🏆 Displaying ${numChampions} champions. Champion is array: ${Array.isArray(champion)}, length: ${Array.isArray(champion) ? champion.length : 'N/A'}`);
