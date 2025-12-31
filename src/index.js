@@ -770,8 +770,8 @@ function describePokemon(p) {
 			{ key: 'spe', label: 'SPE' }
 		];
 		const peak = Math.max(...statEntries.map(s => bs[s.key] || 0));
-		// Dynamic cap: keeps level 50 teams readable and level 100 not overflowing
-		const cap = Math.max(180, Math.min(320, peak));
+		// Dynamic cap based on pokemon level: ~250 for level 50, ~500 for level 100
+		const cap = p.level >= 80 ? 500 : (p.level >= 60 ? 350 : 250);
 		statEntries.forEach(s => {
 			const val = bs[s.key] || 0;
 			const pct = Math.min(100, (val / cap) * 100);
