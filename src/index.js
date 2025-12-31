@@ -741,6 +741,9 @@ function describePokemon(p) {
 	if (p.ability) {
 		details.innerHTML += `<div class="detail-line"><span class="label">ABILITY:</span> ${p.ability}</div>`;
 	}
+	if (p.nature) {
+		details.innerHTML += `<div class="detail-line"><span class="label">NATURE:</span> ${p.nature}</div>`;
+	}
 	// Display originalItem if item was consumed, otherwise display current item
 	const displayItem = p.item || p.originalItem;
 	if (displayItem) {
