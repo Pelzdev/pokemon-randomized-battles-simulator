@@ -6,6 +6,38 @@ import { abilities } from "../data/abilities.js";
 import { items } from "../data/items.js";
 import { pokemonRegistry } from "../utils/pokemonRegistry.js";
 
+// Registry flag – disable to skip global registration for speed
+const REGISTRY_ENABLED = false;
+
+// Nature definitions: +10% to one stat, -10% to another (HP unaffected)
+const NATURES = [
+  { name: 'Hardy' },
+  { name: 'Lonely', plus: 'atk', minus: 'def' },
+  { name: 'Brave', plus: 'atk', minus: 'spe' },
+  { name: 'Adamant', plus: 'atk', minus: 'spA' },
+  { name: 'Naughty', plus: 'atk', minus: 'spD' },
+  { name: 'Bold', plus: 'def', minus: 'atk' },
+  { name: 'Docile' },
+  { name: 'Relaxed', plus: 'def', minus: 'spe' },
+  { name: 'Impish', plus: 'def', minus: 'spA' },
+  { name: 'Lax', plus: 'def', minus: 'spD' },
+  { name: 'Timid', plus: 'spe', minus: 'atk' },
+  { name: 'Hasty', plus: 'spe', minus: 'def' },
+  { name: 'Serious' },
+  { name: 'Jolly', plus: 'spe', minus: 'spA' },
+  { name: 'Naive', plus: 'spe', minus: 'spD' },
+  { name: 'Modest', plus: 'spA', minus: 'atk' },
+  { name: 'Mild', plus: 'spA', minus: 'def' },
+  { name: 'Quiet', plus: 'spA', minus: 'spe' },
+  { name: 'Bashful' },
+  { name: 'Rash', plus: 'spA', minus: 'spD' },
+  { name: 'Calm', plus: 'spD', minus: 'atk' },
+  { name: 'Gentle', plus: 'spD', minus: 'def' },
+  { name: 'Sassy', plus: 'spD', minus: 'spe' },
+  { name: 'Careful', plus: 'spD', minus: 'spA' },
+  { name: 'Quirky' }
+];
+
 // PERFORMANCE OPTIMIZATION: Cache pre-filtered moves by generation
 // This avoids filtering ~900 moves for every single Pokemon created
 const movesCacheByGen = {};
@@ -97,7 +129,19 @@ export function createPokemon(name, level = 50, gen = "generation-i", forceTypes
   }
 
   const usedBaseStats = randomizeStats ? randomizeBaseStats(base.stats) : { ...base.stats };
-  const stats = calculateStats(usedBaseStats, level, ability);
+  let stats = calculateStats(usedBaseStats, level, ability);
+
+  // Assign random nature and apply modifiers to stats (HP unaffected)
+  const nature = NATURES[Math.floor(Math.random() * NATURES.length)];
+  if (nature.plus && nature.minus && nature.plus !== nature.minus) {
+    const boosted = nature.plus;
+    const lowered = nature.minus;
+    stats = {
+      ...stats,
+      [boosted]: Math.floor(stats[boosted] * 1.1),
+      [lowered]: Math.floor(stats[lowered] * 0.9)
+    };
+  }
 
   const p = {
     id: null, // Will be assigned by registry
@@ -106,6 +150,7 @@ export function createPokemon(name, level = 50, gen = "generation-i", forceTypes
     level,
     types,
     ability,
+    nature: nature.name,
     baseStats: usedBaseStats,
     stats,
     maxHp: stats.hp,
@@ -131,8 +176,10 @@ export function createPokemon(name, level = 50, gen = "generation-i", forceTypes
     p.originalItem = p.item; // Store original for restoration
   }
   
-  // Register Pokemon in the global registry
-  pokemonRegistry.register(p);
+  // Register Pokemon in the global registry (disabled for performance)
+  if (REGISTRY_ENABLED) {
+    pokemonRegistry.register(p);
+  }
   
   return p;
 }

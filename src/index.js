@@ -1259,9 +1259,6 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 	// Start timing Pokemon creation
 	const startCreation = performance.now();
 	
-	// Log registry stats before tournament
-	console.log(`📊 Pokemon Registry before tournament: ${pokemonRegistry.count()} Pokémon`);
-	
 	if (!isPowerOfTwo(size)) {
 		logBattle('Tournament size must be a power of two (e.g. 8,16,32).');
 		return;
@@ -1581,33 +1578,6 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 			logsDiv.appendChild(statsReport);
 		}
 		
-		// Display registry statistics
-		const registryTitle = document.createElement('h3');
-		registryTitle.style.marginTop = '30px';
-		registryTitle.textContent = `Pokémon Registry (${pokemonRegistry.count()} Total)`;
-		logsDiv.appendChild(registryTitle);
-		
-		const registryStats = pokemonRegistry.getStats();
-		const registryInfo = document.createElement('div');
-		registryInfo.style.background = 'linear-gradient(135deg, #e8f0e8 0%, #d0e0d8 100%)';
-		registryInfo.style.padding = '20px';
-		registryInfo.style.borderRadius = '10px';
-		registryInfo.style.border = '3px solid #2d4a3e';
-		registryInfo.innerHTML = `
-			<p style="font-size: 20px; color: #2d4a3e;"><strong>Total Pokémon Created:</strong> ${registryStats.total}</p>
-			<p style="font-size: 20px; color: #2d4a3e;"><strong>Average Level:</strong> ${registryStats.averageLevel.toFixed(1)}</p>
-			<p style="font-size: 20px; color: #2d4a3e;"><strong>Most Common Types:</strong> ${Object.entries(registryStats.byType).sort((a,b) => b[1] - a[1]).slice(0, 5).map(([t, c]) => `${t} (${c})`).join(', ')}</p>
-			<button id="viewFullRegistryBtn" style="margin-top: 15px; padding: 10px 20px; font-size: 18px; cursor: pointer;">View Full Registry</button>
-		`;
-		logsDiv.appendChild(registryInfo);
-		
-		// Add event listener to the view registry button
-		const viewFullRegBtn = document.getElementById('viewFullRegistryBtn');
-		if (viewFullRegBtn) {
-			viewFullRegBtn.addEventListener('click', displayPokemonRegistry);
-		}
-		
-		console.log(`📊 Pokemon Registry after tournament: ${pokemonRegistry.count()} Pokémon`);
 	} else {
 		currentPokemon = champion; // Store for saving
 		logBattle(`=== Tournament Champion: ${champion.name} ===`);
