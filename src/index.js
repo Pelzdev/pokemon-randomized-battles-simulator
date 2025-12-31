@@ -680,13 +680,17 @@ const allPokemon = Object.keys(pokemon);
  */
 function describePokemon(p) {
 	clearLogs();
-	
+
 	// Create Pokemon Emerald-style display with HTML
 	const logsDiv = document.getElementById('logs');
-	
+
+	// Remove any existing canvas from DOM (prevents sprite carryover)
+	const oldCanvas = document.getElementById('canvas');
+	if (oldCanvas && oldCanvas.parentNode) oldCanvas.parentNode.removeChild(oldCanvas);
+
 	// Get canvas reference BEFORE clearing the div (it might be inside)
 	let canvas = document.getElementById('canvas');
-	
+
 	// Now clear the div
 	logsDiv.innerHTML = '';
 	
