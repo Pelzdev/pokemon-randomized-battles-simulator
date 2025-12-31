@@ -1232,13 +1232,14 @@ function resetBattleState(p) {
 	p.mustRecharge = false;
 	p.currentMove = null;
 	p.charging = null;
+	p.choiceLockedMove = null; // clear Choice item lock between games/switches
+	p.lastMoveUsed = null; // allow fresh move selection next battle
+	p.tormented = false;
+	p.taunted = false;
+	p.encored = false;
+	p.encoredMove = null;
+	p.disabledMove = null;
 	p.lastDamageDealt = 0;
-	lastMoveUsed = null; // allow fresh move selection next battle
-	tormented = false;
-	taunted = false;
-	encored = false;
-	encoredMove = null;
-	disabledMove = null;
 	p.statStages = { atk: 0, def: 0, spA: 0, spD: 0, spe: 0, acc: 0, eva: 0 };
 	// Restore consumed items
 	if (p.originalItem) {
