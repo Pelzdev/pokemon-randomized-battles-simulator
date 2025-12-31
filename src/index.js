@@ -761,10 +761,24 @@ function describePokemon(p) {
 	statsSection.innerHTML = '<div class="section-header">STATS</div>';
 	if (p.stats) {
 		const bs = p.stats;
-		const maxStat = 255; // Pokemon base stats max out around 255
-		statsSection.innerHTML += `<div class="stat-row"><span class="stat-label">HP</span><div class="stat-bar"><div class="stat-bar-fill" style="width: ${(bs.hp / maxStat * 100)}%"></div></div><span class="stat-value">${bs.hp}</span></div><div class="stat-row"><span class="stat-label">ATK</span><div class="stat-bar"><div class="stat-bar-fill" style="width: ${(bs.atk / maxStat * 100)}%"></div></div><span class="stat-value">${bs.atk}</span></div><div class="stat-row"><span class="stat-label">DEF</span><div class="stat-bar"><div class="stat-bar-fill" style="width: ${(bs.def / maxStat * 100)}%"></div></div><span class="stat-value">${bs.def}</span></div><div class="stat-row"><span class="stat-label">SPA</span><div class="stat-bar"><div class="stat-bar-fill" style="width: ${(bs.spA / maxStat * 100)}%"></div></div><span class="stat-value">${bs.spA}</span></div><div class="stat-row"><span class="stat-label">SPD</span><div class="stat-bar"><div class="stat-bar-fill" style="width: ${(bs.spD / maxStat * 100)}%"></div></div><span class="stat-value">${bs.spD}</span></div><div class="stat-row"><span class="stat-label">SPE</span><div class="stat-bar"><div class="stat-bar-fill" style="width: ${(bs.spe / maxStat * 100)}%"></div></div><span class="stat-value">${bs.spe}</span></div>`;
-		const BST = bs.hp + bs.atk + bs.def + bs.spA + bs.spD + bs.spe;
-		statsSection.innerHTML += `<div class="stat-row bst"><span class="stat-label">BST</span><span class="stat-value">${BST}</span></div>`;
+		const statEntries = [
+			{ key: 'hp', label: 'HP' },
+			{ key: 'atk', label: 'ATK' },
+			{ key: 'def', label: 'DEF' },
+			{ key: 'spA', label: 'SPA' },
+			{ key: 'spD', label: 'SPD' },
+			{ key: 'spe', label: 'SPE' }
+		];
+		const peak = Math.max(...statEntries.map(s => bs[s.key] || 0));
+		// Dynamic cap: keeps level 50 teams readable and level 100 not overflowing
+		const cap = Math.max(180, Math.min(320, peak));
+		statEntries.forEach(s => {
+			const val = bs[s.key] || 0;
+			const pct = Math.min(100, (val / cap) * 100);
+			statsSection.innerHTML += `
+				<div class="stat-row"><span class="stat-label">${s.label}</span><div class="stat-bar"><div class="stat-bar-fill" style="width: ${pct}%"></div></div><span class="stat-value">${val}</span></div>
+			`;
+		});
 	}
 	statsMovesContainer.appendChild(statsSection);
 	
