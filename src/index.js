@@ -755,12 +755,12 @@ function describePokemon(p) {
 	const statsMovesContainer = document.createElement('div');
 	statsMovesContainer.className = 'stats-moves-container';
 	
-	// Stats section - show base stats with visual bars
+	// Stats section - show actual stats with visual bars (nature/item applied)
 	const statsSection = document.createElement('div');
 	statsSection.className = 'stats-section';
 	statsSection.innerHTML = '<div class="section-header">STATS</div>';
-	if (p.baseStats) {
-		const bs = p.baseStats;
+	if (p.stats) {
+		const bs = p.stats;
 		const maxStat = 255; // Pokemon base stats max out around 255
 		statsSection.innerHTML += `<div class="stat-row"><span class="stat-label">HP</span><div class="stat-bar"><div class="stat-bar-fill" style="width: ${(bs.hp / maxStat * 100)}%"></div></div><span class="stat-value">${bs.hp}</span></div><div class="stat-row"><span class="stat-label">ATK</span><div class="stat-bar"><div class="stat-bar-fill" style="width: ${(bs.atk / maxStat * 100)}%"></div></div><span class="stat-value">${bs.atk}</span></div><div class="stat-row"><span class="stat-label">DEF</span><div class="stat-bar"><div class="stat-bar-fill" style="width: ${(bs.def / maxStat * 100)}%"></div></div><span class="stat-value">${bs.def}</span></div><div class="stat-row"><span class="stat-label">SPA</span><div class="stat-bar"><div class="stat-bar-fill" style="width: ${(bs.spA / maxStat * 100)}%"></div></div><span class="stat-value">${bs.spA}</span></div><div class="stat-row"><span class="stat-label">SPD</span><div class="stat-bar"><div class="stat-bar-fill" style="width: ${(bs.spD / maxStat * 100)}%"></div></div><span class="stat-value">${bs.spD}</span></div><div class="stat-row"><span class="stat-label">SPE</span><div class="stat-bar"><div class="stat-bar-fill" style="width: ${(bs.spe / maxStat * 100)}%"></div></div><span class="stat-value">${bs.spe}</span></div>`;
 		const BST = bs.hp + bs.atk + bs.def + bs.spA + bs.spD + bs.spe;
@@ -1284,6 +1284,8 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 		return bst <= 600;
 	});
 	
+	const tournamentLevel = (is2v2 || fullTeams) ? 50 : 100;
+
 	if (is2v2 || fullTeams) {
 		// Create teams of Pokemon for team-based battles
 		// Determine team size based on battle mode
@@ -1308,7 +1310,7 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 			for (let j = 0; j < teamSize; j++) {
 				const species = tournamentPool[Math.floor(Math.random() * tournamentPool.length)];
 				const types = normalTournament ? null : randomTypes(); // null = use normal types
-				const p = createPokemon(species, 50, 'generation-i-ii-iii', types, normalTournament ? false : true, randomAbilities, allowWonderGuard, randomItems, pokemonGens, moveGens);
+				const p = createPokemon(species, tournamentLevel, 'generation-i-ii-iii', types, normalTournament ? false : true, randomAbilities, allowWonderGuard, randomItems, pokemonGens, moveGens);
 				updateTournamentMoveStats(p);
 				team.push(p);
 			}
@@ -1319,7 +1321,7 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 		for (let i = 0; i < size; i++) {
 			const species = tournamentPool[Math.floor(Math.random() * tournamentPool.length)];
 			const types = normalTournament ? null : randomTypes(); // null = use normal types
-			const p = createPokemon(species, 50, 'generation-i-ii-iii', types, normalTournament ? false : true, randomAbilities, allowWonderGuard, randomItems, pokemonGens, moveGens);
+			const p = createPokemon(species, tournamentLevel, 'generation-i-ii-iii', types, normalTournament ? false : true, randomAbilities, allowWonderGuard, randomItems, pokemonGens, moveGens);
 			updateTournamentMoveStats(p);
 			participants.push(p);
 		}
