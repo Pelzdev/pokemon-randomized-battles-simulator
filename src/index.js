@@ -1245,6 +1245,7 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 	resetTournamentMoveStats();
 	// Reset tournament statistics for team battles
 	if (is2v2 || fullTeams) {
+		tournamentStats.setEnabled(false); // disable tracking/noise by default
 		tournamentStats.reset();
 	}
 	
@@ -1561,15 +1562,17 @@ async function runTournament(size = 16, includeOver600BST = false, randomAbiliti
 			logsDiv.appendChild(logsContainer);
 		}
 		
-		// Display tournament statistics report
-		const statsTitle = document.createElement('h3');
-		statsTitle.style.marginTop = '30px';
-		statsTitle.textContent = 'Tournament Statistics';
-		logsDiv.appendChild(statsTitle);
-		
-		const statsReport = document.createElement('div');
-		statsReport.innerHTML = tournamentStats.generateHTMLReport();
-		logsDiv.appendChild(statsReport);
+		// Display tournament statistics report (disabled by default)
+		if (tournamentStats.enabled) {
+			const statsTitle = document.createElement('h3');
+			statsTitle.style.marginTop = '30px';
+			statsTitle.textContent = 'Tournament Statistics';
+			logsDiv.appendChild(statsTitle);
+
+			const statsReport = document.createElement('div');
+			statsReport.innerHTML = tournamentStats.generateHTMLReport();
+			logsDiv.appendChild(statsReport);
+		}
 		
 		// Display registry statistics
 		const registryTitle = document.createElement('h3');

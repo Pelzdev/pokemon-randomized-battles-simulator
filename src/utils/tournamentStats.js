@@ -5,7 +5,13 @@
 
 export class TournamentStats {
   constructor() {
+    // Tracking is disabled by default; enables on demand
+    this.enabled = false;
     this.reset();
+  }
+
+  setEnabled(flag) {
+    this.enabled = !!flag;
   }
 
   reset() {
@@ -18,6 +24,7 @@ export class TournamentStats {
    * Initialize a new match
    */
   startMatch(team1Names, team2Names) {
+    if (!this.enabled) return;
     this.currentMatch = {
       team1: team1Names,
       team2: team2Names,
@@ -30,6 +37,7 @@ export class TournamentStats {
    * End current match
    */
   endMatch(winningTeam) {
+    if (!this.enabled) return;
     if (this.currentMatch) {
       this.currentMatch.endTime = Date.now();
       this.currentMatch.duration = this.currentMatch.endTime - this.currentMatch.startTime;
@@ -83,6 +91,7 @@ export class TournamentStats {
    * Record a battle participation
    */
   recordBattle(pokemonName, won) {
+    if (!this.enabled) return;
     const stats = this.getPokemonStats(pokemonName);
     stats.battles++;
     if (won) stats.wins++;
@@ -96,6 +105,7 @@ export class TournamentStats {
    * @param {string} reason - Reason for switch: 'death', 'lowHP', 'typeDisadvantage', or null
    */
   recordSwitch(pokemonName, switchType = 'out', reason = null) {
+    if (!this.enabled) return;
     const stats = this.getPokemonStats(pokemonName);
     stats.switches++;
     if (switchType === 'out') stats.switchOuts++;
@@ -125,6 +135,7 @@ export class TournamentStats {
    * Record a KO
    */
   recordKO(killerName, victimName, moveName, turn) {
+    if (!this.enabled) return;
     const killerStats = this.getPokemonStats(killerName);
     const victimStats = this.getPokemonStats(victimName);
     
@@ -149,6 +160,7 @@ export class TournamentStats {
    * Record move usage
    */
   recordMoveUsed(pokemonName, moveName, damage = 0, wasCrit = false, causedFlinch = false) {
+    if (!this.enabled) return;
     const stats = this.getPokemonStats(pokemonName);
     
     const moveCount = stats.movesUsed.get(moveName) || 0;
@@ -168,6 +180,7 @@ export class TournamentStats {
    * Record damage taken
    */
   recordDamageTaken(pokemonName, damage) {
+    if (!this.enabled) return;
     const stats = this.getPokemonStats(pokemonName);
     stats.damageTaken += damage;
   }
@@ -176,6 +189,7 @@ export class TournamentStats {
    * Record status inflicted
    */
   recordStatusInflicted(attackerName, targetName, status) {
+    if (!this.enabled) return;
     const attackerStats = this.getPokemonStats(attackerName);
     const targetStats = this.getPokemonStats(targetName);
     
@@ -190,6 +204,7 @@ export class TournamentStats {
    * Record HP restored (healing)
    */
   recordHPRestored(pokemonName, amount) {
+    if (!this.enabled) return;
     const stats = this.getPokemonStats(pokemonName);
     stats.hpRestored += amount;
   }
@@ -198,6 +213,7 @@ export class TournamentStats {
    * Record recoil damage
    */
   recordRecoilDamage(pokemonName, amount) {
+    if (!this.enabled) return;
     const stats = this.getPokemonStats(pokemonName);
     stats.recoilDamage += amount;
   }
@@ -206,6 +222,7 @@ export class TournamentStats {
    * Increment turns active for a Pokemon
    */
   recordTurnActive(pokemonName) {
+    if (!this.enabled) return;
     const stats = this.getPokemonStats(pokemonName);
     stats.turnsActive++;
   }
@@ -214,6 +231,7 @@ export class TournamentStats {
    * Get summary statistics
    */
   getSummary() {
+    if (!this.enabled) return { totalMatches: 0, totalPokemon: 0, stats: [], byKills: [], byDamage: [], bySwitches: [], byWinRate: [], bySurvivability: [] };
     const summary = {
       totalMatches: this.matchStats.length,
       totalPokemon: this.pokemonStats.size,
@@ -254,6 +272,7 @@ export class TournamentStats {
    * Generate a detailed HTML report
    */
   generateHTMLReport() {
+    if (!this.enabled) return '';
     const summary = this.getSummary();
     let html = '<div class="tournament-stats-report">';
     
@@ -379,6 +398,7 @@ export class TournamentStats {
    * Log summary to console
    */
   logSummary() {
+    if (!this.enabled) return;
     const summary = this.getSummary();
     console.log('=== TOURNAMENT STATISTICS ===');
     console.log(`Total Matches: ${summary.totalMatches}`);
